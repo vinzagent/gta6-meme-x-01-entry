@@ -27,5 +27,14 @@ if (typeof post.url !== 'string' || !/^https:\/\/x\.com\/[^/]+\/status\/\d+$/.te
 }
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
-copyFileSync(postPath, join(OUTPUT_DIR, 'POST.json'));
+const outPath = join(OUTPUT_DIR, 'POST.json');
+copyFileSync(postPath, outPath);
+
+// Read the handed-in copy back and prove it names the same post: a truncated
+// or swapped file must fail here, not silently reach the gate.
+const handedIn = JSON.parse(readFileSync(outPath, 'utf8')) as { url?: unknown };
+if (handedIn.url !== post.url) {
+  console.error(`hand-in mismatch: copied ${String(handedIn.url)} but POST.json names ${post.url}`);
+  process.exit(1);
+}
 console.log(`handed in the post: ${post.url}`);
